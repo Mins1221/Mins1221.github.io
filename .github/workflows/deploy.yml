@@ -19,6 +19,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: List files (debug)
+        run: ls -la
+
       - name: Inject token into index.html
         run: |
           sed -i "s|__GH_TOKEN__|${{ secrets.GH_TOKEN }}|g" index.html
