@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mins1221 · Codetree 풀이 기록</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Gmarket+Sans:wght@300;500;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --surface: #161b22; --surface2: #1c2128; --border: #30363d;
+      --text: #e6edf3; --muted: #7d8590;
+      --green0: #161b22; --green1: #0e4429; --green2: #006d32; --green3: #26a641; --green4: #39d353;
+      --accent: #39d353; --accent2: #58a6ff; --red: #f85149;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Gmarket Sans', sans-serif; font-weight: 300; min-height: 100vh; }
+    header {
+      border-bottom: 1px solid var(--border); padding: 1.2rem 2rem;
+      display: flex; align-items: center; gap: 1rem;
+      position: sticky; top: 0;
+      background: rgba(13,17,23,0.92); backdrop-filter: blur(12px); z-index: 100;
+    }
+    .header-logo { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 700; color: var(--accent); }
+    .header-logo span { color: var(--muted); }
+    .header-badge { background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 0.2rem 0.75rem; font-size: 0.7rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+    .header-right { margin-left: auto; }
+    .github-link { display: flex; align-items: center; gap: 0.4rem; color: var(--muted); text-decoration: none; font-size: 0.78rem; transition: color 0.2s; }
+    .github-link:hover { color: var(--text); }
+    main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 2rem; }
+    .profile-strip {
+      display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2.5rem;
+      padding: 1.5rem 2rem; background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      animation: fadeIn 0.5s ease forwards;
+    }
+    .profile-avatar { width: 64px; height: 64px; border-radius: 50%; border: 2px solid var(--border); object-fit: cover; background: var(--surface2); }
+    .profile-name { font-size: 1.3rem; font-weight: 700; }
+    .profile-sub { font-size: 0.78rem; color: var(--muted); margin-top: 0.2rem; font-family: 'JetBrains Mono', monospace; }
+    .profile-stats { margin-left: auto; display: flex; gap: 2.5rem; }
+    .stat-item { text-align: center; }
+    .stat-num { font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 700; color: var(--accent); display: block; }
+    .stat-label { font-size: 0.68rem; color: var(--muted); }
+    .section-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
+    .section-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+    .section-title { font-size: 0.82rem; font-weight: 500; letter-spacing: 0.04em; }
+    .section-line { flex: 1; height: 1px; background: var(--border); }
+    .heatmap-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      padding: 1.5rem 2rem; margin-bottom: 2rem; overflow-x: auto;
+      animation: fadeIn 0.5s 0.1s ease both;
+    }
+    .heatmap-outer { min-width: 680px; }
+    .heatmap-months { display: flex; gap: 3px; margin-bottom: 4px; }
+    .month-label { font-size: 0.62rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; width: 16px; text-align: left; flex-shrink: 0; }
+    .heatmap-wrap { display: flex; gap: 3px; }
+    .heatmap-col { display: flex; flex-direction: column; gap: 3px; }
+    .heatmap-cell {
+      width: 13px; height: 13px; border-radius: 2px; background: var(--green0);
+      border: 1px solid rgba(255,255,255,0.04); cursor: pointer;
+      transition: transform 0.15s; position: relative;
+    }
+    .heatmap-cell:hover { transform: scale(1.5); z-index: 10; }
+    .heatmap-cell[data-level="1"] { background: var(--green1); }
+    .heatmap-cell[data-level="2"] { background: var(--green2); }
+    .heatmap-cell[data-level="3"] { background: var(--green3); }
+    .heatmap-cell[data-level="4"] { background: var(--green4); }
+    .heatmap-legend { display: flex; align-items: center; gap: 4px; margin-top: 0.8rem; justify-content: flex-end; }
+    .heatmap-legend span { font-size: 0.65rem; color: var(--muted); margin: 0 3px; }
+    .legend-cell { width: 13px; height: 13px; border-radius: 2px; border: 1px solid rgba(255,255,255,0.04); }
+    .tooltip {
+      position: fixed; background: #2d333b; border: 1px solid var(--border); border-radius: 6px;
+      padding: 0.35rem 0.75rem; font-size: 0.7rem; color: var(--text);
+      pointer-events: none; z-index: 999; display: none; white-space: nowrap;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .filter-bar { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .filter-input {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
+      padding: 0.45rem 1rem; color: var(--text); font-size: 0.8rem;
+      font-family: 'JetBrains Mono', monospace; outline: none; flex: 1; min-width: 160px;
+      transition: border-color 0.2s;
+    }
+    .filter-input:focus { border-color: var(--accent2); }
+    .filter-count { font-size: 0.72rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; white-space: nowrap; }
+    .problem-list { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 2rem; }
+    .problem-item {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+      padding: 0.9rem 1.2rem; display: flex; align-items: center; gap: 1rem;
+      cursor: pointer; transition: border-color 0.2s, background 0.2s;
+      animation: fadeIn 0.4s ease both;
+    }
+    .problem-item:hover { border-color: var(--accent2); background: var(--surface2); }
+    .problem-item.open { border-color: var(--accent2); border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-bottom: none; }
+    .problem-icon { font-size: 1rem; width: 26px; text-align: center; flex-shrink: 0; }
+    .problem-name { font-size: 0.86rem; font-weight: 500; flex: 1; word-break: break-all; }
+    .problem-path { font-size: 0.7rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; margin-top: 0.15rem; }
+    .problem-date { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--muted); flex-shrink: 0; }
+    .problem-chevron { color: var(--muted); font-size: 0.65rem; transition: transform 0.2s; flex-shrink: 0; }
+    .problem-item.open .problem-chevron { transform: rotate(90deg); }
+    .code-panel {
+      display: none; background: #010409;
+      border: 1px solid var(--accent2); border-top: none;
+      border-radius: 0 0 8px 8px; margin-top: 0; margin-bottom: 0.5rem; overflow: hidden;
+    }
+    .code-panel.open { display: block; }
+    .code-toolbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.5rem 1rem; background: var(--surface2); border-bottom: 1px solid var(--border);
+    }
+    .code-filename { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--muted); }
+    .copy-btn {
+      background: none; border: 1px solid var(--border); color: var(--muted);
+      padding: 0.2rem 0.6rem; font-size: 0.68rem; border-radius: 4px; cursor: pointer;
+      font-family: 'JetBrains Mono', monospace; transition: color 0.2s, border-color 0.2s;
+    }
+    .copy-btn:hover { color: var(--text); border-color: var(--text); }
+    .code-scroll { overflow-x: auto; max-height: 480px; overflow-y: auto; }
+    pre {
+      padding: 1.2rem 1.5rem; font-family: 'JetBrains Mono', monospace; font-size: 0.76rem;
+      line-height: 1.75; color: #adbac7; white-space: pre; min-width: max-content;
+    }
+    .kw  { color: #f47067; } .fn  { color: #dcbdfb; }
+    .str { color: #96d0ff; } .num { color: #6cb6ff; } .cm  { color: #636e7b; }
+    .loading-wrap { text-align: center; padding: 3rem 2rem; color: var(--muted); }
+    .spinner { width: 28px; height: 28px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1rem; }
+    .error-box { background: rgba(248,81,73,0.08); border: 1px solid rgba(248,81,73,0.3); border-radius: 8px; padding: 1.2rem 1.5rem; color: var(--red); font-size: 0.82rem; text-align: center; }
+    .empty-box { text-align: center; padding: 3rem; color: var(--muted); font-size: 0.85rem; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (max-width: 600px) {
+      .profile-stats { display: none; }
+      main { padding: 1.5rem 1rem; }
+      header { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="tooltip" id="tooltip"></div>
+
+<header>
+  <div class="header-logo">Mins1221<span>/</span>Codetree-python</div>
+  <div class="header-badge">🐍 Python</div>
+  <div class="header-right">
+    <a href="https://github.com/Mins1221/Codetree-python" target="_blank" class="github-link">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      GitHub
+    </a>
+  </div>
+</header>
+
+<main>
+  <div class="profile-strip">
+    <img class="profile-avatar" src="https://github.com/Mins1221.png" alt="avatar" onerror="this.src=''" />
+    <div>
+      <div class="profile-name">Mins1221</div>
+      <div class="profile-sub">github.com/Mins1221 · Codetree-python</div>
+    </div>
+    <div class="profile-stats">
+      <div class="stat-item"><span class="stat-num" id="statCommits">—</span><span class="stat-label">총 커밋</span></div>
+      <div class="stat-item"><span class="stat-num" id="statProblems">—</span><span class="stat-label">푼 문제</span></div>
+      <div class="stat-item"><span class="stat-num" id="statStreak">—</span><span class="stat-label">연속 일수</span></div>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <div class="section-dot"></div>
+    <div class="section-title">커밋 히트맵 — 최근 1년</div>
+    <div class="section-line"></div>
+  </div>
+  <div class="heatmap-card">
+    <div id="heatmapLoading" class="loading-wrap"><div class="spinner"></div><div>히트맵 불러오는 중...</div></div>
+    <div id="heatmapContent" style="display:none">
+      <div class="heatmap-outer">
+        <div class="heatmap-months" id="monthLabels"></div>
+        <div class="heatmap-wrap" id="heatmapGrid"></div>
+      </div>
+      <div class="heatmap-legend">
+        <span>적음</span>
+        <div class="legend-cell" style="background:var(--green0)"></div>
+        <div class="legend-cell" style="background:var(--green1)"></div>
+        <div class="legend-cell" style="background:var(--green2)"></div>
+        <div class="legend-cell" style="background:var(--green3)"></div>
+        <div class="legend-cell" style="background:var(--green4)"></div>
+        <span>많음</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <div class="section-dot" style="background:var(--accent2)"></div>
+    <div class="section-title">풀이 목록</div>
+    <div class="section-line"></div>
+  </div>
+  <div class="filter-bar">
+    <input class="filter-input" id="searchInput" type="text" placeholder="문제 이름으로 검색..." />
+    <span class="filter-count" id="filterCount"></span>
+  </div>
+  <div id="problemsLoading" class="loading-wrap"><div class="spinner"></div><div>문제 목록 불러오는 중...</div></div>
+  <div id="problemsList" class="problem-list"></div>
+</main>
+
+<script>
+const OWNER = 'Mins1221', REPO = 'Codetree-python';
+const API = 'https://api.github.com';
+const TOKEN = '__GH_TOKEN__';
+const H = {
+  'Accept': 'application/vnd.github.v3+json',
+  'Authorization': `token ${TOKEN}`
+};
+let allProblems = [], commitDateMap = {};
+
+async function fetchAll(url) {
+  let res = [], page = 1;
+  while(true) {
+    const r = await fetch(`${url}${url.includes('?')? '&':'?'}per_page=100&page=${page}`, {headers:H});
+    if(!r.ok) throw new Error(`GitHub API ${r.status}`);
+    const d = await r.json();
+    if(!Array.isArray(d) || !d.length) break;
+    res = res.concat(d);
+    if(d.length < 100) break;
+    page++;
+  }
+  return res;
+}
+
+async function loadHeatmap() {
+  try {
+    const since = new Date(); since.setFullYear(since.getFullYear()-1);
+    const commits = await fetchAll(`${API}/repos/${OWNER}/${REPO}/commits?since=${since.toISOString()}`);
+    commits.forEach(c => {
+      const date = (c.commit?.author?.date||'').slice(0,10);
+      if(date) commitDateMap[date] = (commitDateMap[date]||0)+1;
+    });
+    document.getElementById('statCommits').textContent = commits.length;
+
+    const grid = document.getElementById('heatmapGrid');
+    const monthDiv = document.getElementById('monthLabels');
+    grid.innerHTML = ''; monthDiv.innerHTML = '';
+
+    const today = new Date();
+    const start = new Date(today);
+    start.setDate(today.getDate() - 364);
+    start.setDate(start.getDate() - start.getDay());
+
+    const maxC = Math.max(1, ...Object.values(commitDateMap));
+    const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    let lastM = -1;
+
+    for(let w=0; w<53; w++) {
+      const col = document.createElement('div'); col.className = 'heatmap-col';
+      const lbl = document.createElement('div'); lbl.className = 'month-label';
+      for(let d=0; d<7; d++) {
+        const date = new Date(start); date.setDate(start.getDate() + w*7 + d);
+        if(date > today) { const e=document.createElement('div'); e.style.cssText='width:13px;height:13px'; col.appendChild(e); continue; }
+        const ds = date.toISOString().slice(0,10);
+        const cnt = commitDateMap[ds]||0;
+        const lvl = cnt===0?0:cnt<=maxC*0.25?1:cnt<=maxC*0.5?2:cnt<=maxC*0.75?3:4;
+        const cell = document.createElement('div');
+        cell.className = 'heatmap-cell'; cell.dataset.level = lvl; cell.dataset.date = ds; cell.dataset.count = cnt;
+        cell.addEventListener('mouseenter', e => {
+          const t = document.getElementById('tooltip');
+          t.textContent = `${ds}  ·  ${cnt}개 커밋`; t.style.display='block';
+        });
+        cell.addEventListener('mousemove', e => {
+          const t = document.getElementById('tooltip');
+          t.style.left=(e.clientX+12)+'px'; t.style.top=(e.clientY-30)+'px';
+        });
+        cell.addEventListener('mouseleave', ()=>{ document.getElementById('tooltip').style.display='none'; });
+        col.appendChild(cell);
+        if(d===0) {
+          const m = date.getMonth();
+          if(m!==lastM){ lbl.textContent=MONTHS[m]; lastM=m; }
+          monthDiv.appendChild(lbl);
+        }
+      }
+      grid.appendChild(col);
+    }
+    document.getElementById('heatmapLoading').style.display='none';
+    document.getElementById('heatmapContent').style.display='block';
+  } catch(e) {
+    document.getElementById('heatmapLoading').innerHTML=`<div class="error-box">히트맵 오류: ${e.message}</div>`;
+  }
+}
+
+function calcStreak() {
+  let streak=0, d=new Date();
+  while(true) {
+    const ds = d.toISOString().slice(0,10);
+    if(commitDateMap[ds]) { streak++; d.setDate(d.getDate()-1); } else break;
+  }
+  document.getElementById('statStreak').textContent = streak+'일';
+}
+
+async function loadProblems() {
+  try {
+    const repoR = await fetch(`${API}/repos/${OWNER}/${REPO}`, {headers:H});
+    if(!repoR.ok) throw new Error(`저장소 오류: ${repoR.status}`);
+    const repoData = await repoR.json();
+    const branch = repoData.default_branch || 'main';
+
+    const refR = await fetch(`${API}/repos/${OWNER}/${REPO}/git/ref/heads/${branch}`, {headers:H});
+    if(!refR.ok) throw new Error(`브랜치(${branch})를 찾을 수 없어요`);
+    const ref = await refR.json();
+    const sha = ref.object?.sha;
+    if(!sha) throw new Error('브랜치 SHA를 가져오지 못했어요');
+
+    const treeR = await fetch(`${API}/repos/${OWNER}/${REPO}/git/trees/${sha}?recursive=1`, {headers:H});
+    const tree = await treeR.json();
+    const pyFiles = (tree.tree||[]).filter(f=>f.type==='blob'&&f.path.endsWith('.py'));
+
+    const recentCommits = await fetchAll(`${API}/repos/${OWNER}/${REPO}/commits`);
+    const fileDate = {};
+    for(const c of recentCommits) {
+      const date = (c.commit?.author?.date||'').slice(0,10);
+      if(!date) continue;
+      try {
+        const cr = await fetch(`${API}/repos/${OWNER}/${REPO}/commits/${c.sha}`, {headers:H});
+        const cd = await cr.json();
+        (cd.files||[]).forEach(f => { if(!fileDate[f.filename]) fileDate[f.filename]=date; });
+      } catch(e) {}
+    }
+
+    allProblems = pyFiles.map(f => {
+      const parts = f.path.split('/');
+      const filename = parts[parts.length-1];
+      const name = filename.replace('.py','').replace(/_/g,' ').replace(/-/g,' ');
+      return { path: f.path, name, sha: f.sha, date: fileDate[f.path]||'' };
+    }).sort((a,b) => b.date.localeCompare(a.date)||a.path.localeCompare(b.path));
+
+    document.getElementById('statProblems').textContent = allProblems.length;
+    document.getElementById('problemsLoading').style.display='none';
+    renderProblems(allProblems);
+  } catch(e) {
+    document.getElementById('problemsLoading').innerHTML=`<div class="error-box">문제 목록 오류: ${e.message}</div>`;
+  }
+}
+
+function renderProblems(list) {
+  const c = document.getElementById('problemsList');
+  document.getElementById('filterCount').textContent = `${list.length}개`;
+  c.innerHTML = '';
+  if(!list.length) { c.innerHTML='<div class="empty-box">검색 결과가 없어요 🌱</div>'; return; }
+  list.forEach((p,i) => {
+    const item = document.createElement('div');
+    item.className = 'problem-item';
+    item.style.animationDelay = `${Math.min(i,20)*0.03}s`;
+    item.innerHTML = `
+      <div class="problem-icon">🐍</div>
+      <div style="flex:1;min-width:0">
+        <div class="problem-name">${esc(p.name)}</div>
+        <div class="problem-path">${esc(p.path)}</div>
+      </div>
+      <div class="problem-date">${p.date||'—'}</div>
+      <div class="problem-chevron">▶</div>`;
+    const panel = document.createElement('div');
+    panel.className = 'code-panel';
+    panel.innerHTML = `
+      <div class="code-toolbar">
+        <span class="code-filename">${esc(p.path)}</span>
+        <button class="copy-btn" onclick="copyCode(this)">복사</button>
+      </div>
+      <div class="code-scroll"><pre id="pre-${i}"><span style="color:var(--muted)">불러오는 중...</span></pre></div>`;
+    item.addEventListener('click', async () => {
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.problem-item.open').forEach(el=>{
+        el.classList.remove('open'); el.nextElementSibling?.classList.remove('open');
+      });
+      if(!isOpen) {
+        item.classList.add('open'); panel.classList.add('open');
+        const pre = document.getElementById(`pre-${i}`);
+        if(pre.dataset.loaded) return;
+        try {
+          const r = await fetch(`${API}/repos/${OWNER}/${REPO}/git/blobs/${p.sha}`, {headers:H});
+          const blob = await r.json();
+          const code = decodeURIComponent(escape(atob(blob.content.replace(/\n/g,''))));
+          pre.innerHTML = highlight(code);
+          pre.dataset.loaded='1';
+        } catch(e) { pre.textContent='코드를 불러오지 못했어요.'; }
+      }
+    });
+    c.appendChild(item); c.appendChild(panel);
+  });
+}
+
+function highlight(code) {
+  return esc(code)
+    .replace(/(#[^\n]*)/g,'<span class="cm">$1</span>')
+    .replace(/\b(def|class|import|from|return|if|elif|else|for|while|in|not|and|or|True|False|None|pass|break|continue|with|as|try|except|finally|raise|lambda|yield|global|nonlocal|del|assert|print|input|range|len|int|str|list|dict|set|tuple|sorted|map|filter|zip|enumerate)\b/g,'<span class="kw">$1</span>')
+    .replace(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g,'<span class="str">$1</span>')
+    .replace(/\b(\d+\.?\d*)\b/g,'<span class="num">$1</span>');
+}
+
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function copyCode(btn) {
+  const pre = btn.closest('.code-panel').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(()=>{ btn.textContent='복사됨!'; setTimeout(()=>btn.textContent='복사',1500); });
+}
+
+document.getElementById('searchInput').addEventListener('input', e=>{
+  const q = e.target.value.toLowerCase();
+  renderProblems(allProblems.filter(p=>p.name.toLowerCase().includes(q)||p.path.toLowerCase().includes(q)));
+});
+
+(async()=>{
+  await loadHeatmap();
+  calcStreak();
+  loadProblems();
+})();
+</script>
+</body>
+</html>
